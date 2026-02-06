@@ -1,8 +1,8 @@
 # sunset-llm
 
-Mini-LLM que genera poemas en español sobre atardeceres y el mar.
+A mini-LLM that generates Spanish poems about sunsets and the sea.
 
-## Arquitectura
+## Architecture
 
 ```
 Input: "El sol se hunde en"
@@ -19,7 +19,7 @@ Input: "El sol se hunde en"
             │
             ▼
     ┌───────────────┐
-    │ Transformer   │ ×6 capas
+    │ Transformer   │ ×6 layers
     │ Block         │
     │  - Attention  │
     │  - FFN        │
@@ -34,42 +34,42 @@ Input: "El sol se hunde en"
 Output: "el mar"
 ```
 
-## Instalación
+## Installation
 
 ```bash
 pip install torch
 ```
 
-## Uso
+## Usage
 
 ```python
 from model import GPT
 from config import GPTConfig
 from tokenizer import Tokenizer
 
-# Crear modelo
+# Create model
 config = GPTConfig()
 model = GPT(config)
 
-# Cargar tokenizer
+# Load tokenizer
 tokenizer = Tokenizer()
 tokenizer.load("tokenizer.json")
 
-# Generar texto
+# Generate text
 prompt = "El mar en calma"
 output = model.generate(prompt, tokenizer, max_tokens=50)
 print(output)
 ```
 
-## Entrenamiento
+## Training
 
-```python
+```bash
 python train.py
 ```
 
-## Configuración
+## Configuration
 
-| Parámetro | Valor |
+| Parameter | Value |
 |-----------|-------|
 | vocab_size | ~5000 |
 | d_model | 384 |
@@ -78,7 +78,7 @@ python train.py
 | context_len | 256 |
 | batch_size | 64 |
 
-## Ejemplo de Salida
+## Example Output
 
 ```
 Input:  "El mar en calma"
