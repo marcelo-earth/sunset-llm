@@ -1,6 +1,10 @@
-# sunset-llm
+<p align="center">
+  <h1 align="center">🌅 Sunset LLM 📑</h1>
+</p>
 
-A mini-LLM that generates Spanish poems about sunsets and the sea.
+<p align="center">
+  A mini-LLM that generates Spanish poems about sunsets and the sea. 📑<br />
+</p>
 
 ## Architecture
 
