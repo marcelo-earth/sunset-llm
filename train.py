@@ -1,14 +1,44 @@
 import argparse
+import math
 import os
 import torch
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
-from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.optim.lr_scheduler import LambdaLR
 
 from config import GPTConfig
 from model import GPT
 from tokenizer import Tokenizer
 from dataset import PoemDataset, collate_fn, SAMPLE_POEMS, load_poems
+
+
+def get_scheduler(optimizer, warmup_steps: int, total_steps: int):
+    """Cosine scheduler with linear warmup."""
+    def lr_lambda(step):
+        if step < warmup_steps:
+            return step / warmup_steps
+        progress = (step - warmup_steps) / (total_steps - warmup_steps)
+        return 0.5 * (1 + math.cos(math.pi * progress))
+    return LambdaLR(optimizer, lr_lambda)
+
+
+def get_optimizer(model, lr: float, weight_decay: float):
+    """AdamW with weight decay excluded for LayerNorm and bias."""
+    decay_params = []
+    no_decay_params = []
+
+    for name, param in model.named_parameters():
+        if not param.requires_grad:
+            continue
+        if 'ln' in name or 'bias' in name:
+            no_decay_params.append(param)
+        else:
+            decay_params.append(param)
+
+    return AdamW([
+        {"params": decay_params, "weight_decay": weight_decay},
+        {"params": no_decay_params, "weight_decay": 0.0}
+    ], lr=lr)
 
 
 def train(
@@ -134,9 +164,11 @@ def main():
     print(f"Training examples: {len(dataset)}")
 
     # Optimizer and scheduler
-    optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=0.1)
+    optimizer = get_optimizer(model, lr=args.lr, weight_decay=0.1)
     total_steps = args.epochs * len(train_loader)
-    scheduler = CosineAnnealingLR(optimizer, T_max=total_steps, eta_min=1e-5)
+    warmup_steps = total_steps // 10  # 10% warmup
+    scheduler = get_scheduler(optimizer, warmup_steps, total_steps)
+    print(f"Total steps: {total_steps}, Warmup steps: {warmup_steps}")
 
     # Training loop
     print("\nStarting training...")
